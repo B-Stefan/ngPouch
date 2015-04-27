@@ -11,7 +11,6 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
       // Options
       invokeApply: true,
 
-
       // Persistent Settings
       settings: {
         database: undefined,
@@ -351,7 +350,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
             'design_doc'
         ];
           //Exclude by you
-        if(exclusiveDisable.indexOf(key)){
+        if(exclusiveDisable.indexOf(key)>-1){
           return false;
           //Internal field
         }else if(key.substr(0,1) === '_') {
@@ -382,7 +381,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
 
               //If normal val
             }else {
-              obj[key] = encptDecpytFunction.call(this,val);
+              obj[key] = encptDecpytFunction.call($crypto,val);
             }
           }
           if (typeof val === 'function'){
