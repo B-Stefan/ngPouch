@@ -22,11 +22,11 @@
     "npm-debug.log"
   ],
   "dependencies": {
-    "pouchdb": "~3.0.6",
+    "pouchdb": "~3.6.0",
     "ngStorage": "~0.1.8",
     "angular-uuid-service": "~0.0.1",
     "angular-cryptography": "https://github.com/middleout/angular-cryptography#master",
-    "filter-pouch": "https://github.com/B-Stefan/filter-pouch.git#master",
+    "transform-pouch": "~1.0.2",
     "pouchdb-authentication": "~0.3.6"
   }
 }
