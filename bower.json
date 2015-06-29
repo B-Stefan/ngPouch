@@ -25,8 +25,7 @@
     "pouchdb": "~3.0.6",
     "ngStorage": "~0.1.8",
     "angular-uuid-service": "~0.0.1",
-    "cryptojslib": "~3.1.2",
-    "angular-cryptography": "~1.0.0",
+    "angular-cryptography": "https://github.com/middleout/angular-cryptography#master",
     "filter-pouch": "https://github.com/B-Stefan/filter-pouch.git#master",
     "pouchdb-authentication": "~0.3.6"
   }
