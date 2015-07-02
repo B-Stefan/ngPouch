@@ -412,6 +412,8 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                             if(doc._id.indexOf('_design') > -1) {
                                 return doc;
                             } else if (doc.encrypted) {
+                                doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.decrypt);
+                                doc.encrypted = false;
                                 return doc;
                             } else {
                                 doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt);
@@ -423,6 +425,8 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                             if(doc._id.indexOf('_design') > -1) {
                                 return doc;
                             } else if (!doc.encrypted) {
+                                doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt);
+                                doc.encrypted = true;
                                 return doc;
                             } else {
                                 doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.decrypt);
