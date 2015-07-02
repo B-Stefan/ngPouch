@@ -349,7 +349,8 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
             isKeyInEncryptionList: function(key,value){
 
                 var exclusiveDisable = [
-                    'docType'
+                    'docType',
+                    'encrypted'
                 ];
 
                 //Excluded by exclusiveDisable array
@@ -410,15 +411,19 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                         incoming:function(doc) {
                             if(doc._id.indexOf('_design') > -1) {
                                 return doc;
-                            } else {
-                                return self.recursiveObjectEncryptDecrypt(doc,$crypto.encrypt);
+                            } else if (!doc.encrypted) {
+                                doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt);
+                                doc.encrypted = true;
+                                return doc;
                             }
                         },
                         outgoing: function(doc){
                             if(doc._id.indexOf('_design') > -1) {
                                 return doc;
-                            } else {
-                                return self.recursiveObjectEncryptDecrypt(doc, $crypto.decrypt);
+                            } else if (doc.encrypted) {
+                                doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.decrypt);
+                                doc.encrypted = false;
+                                return doc;
                             }
                         }
                     });
@@ -555,8 +560,6 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                 self.session.docsReceived = 0;
                 self.disconnect();
                 self.createRemoteDb();
-
-                //TODO implement cancelling replication for logout http://pouchdb.com/api.html#replication
 
                 self.session.replicationTo = self.db.replicate.to(self.remotedb, {live: true})
                     .on('change', function(info)   {self.handleReplicationTo(info, "change");})
