@@ -351,10 +351,11 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                 var exclusiveDisable = [
                     'docType'
                 ];
-                //Exclude by you
+
+                //Excluded by exclusiveDisable array
                 if(exclusiveDisable.indexOf(key) > -1){
                     return false;
-                    //Internal field
+                //Internal field
                 }else if(key.substr(0,1) === '_') {
                     return false;
                 }else if (typeof value === 'function' ){
@@ -380,14 +381,13 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
 
                                 //Call for each element of an array
                             } else if (angular.isArray(obj)) {
-                                //console.log(key + ' is array');
                                 for (var i = 0; i < val.length; i++) {
                                     val[i] = self.recursiveObjectEncryptDecrypt.call(self,val[i],encryptDecryptFunction);
                                 }
 
-                                //If normal val
+                            //If normal val
                             } else {
-                                obj[key] = encryptDecryptFunction.call(this, val);
+                                obj[key] = encryptDecryptFunction.call(this, val.toString());
                             }
                         }
                         if (typeof val === 'function'){
@@ -415,7 +415,6 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                             }
                         },
                         outgoing: function(doc){
-                            console.log();
                             if(doc._id.indexOf('_design') > -1) {
                                 return doc;
                             } else {
