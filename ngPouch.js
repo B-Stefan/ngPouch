@@ -562,6 +562,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                         } else {
                             self.settings['stayConnected'] = false;
                             storage.pouchSettings = self.getSettings();
+
                             self.cancelProgressiveRetry();
                             self.disconnect();
                             self.createRemoteDb();
