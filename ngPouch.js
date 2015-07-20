@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
-    .service('ngPouch', function($timeout, storage,$crypto) {
+    .service('ngPouch', function($timeout, $q, storage, $crypto) {
 
         var service =  {
             // Databases
@@ -551,14 +551,26 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
             },
 
             logoff: function() {
-                this.settings['stayConnected']=false;
-                storage.pouchSettings = this.getSettings();
 
-                // Throwing the kitchen sync to break the live sync
-                this.cancelProgressiveRetry();
-                this.disconnect();
-                this.createRemoteDb();
-                this.delaySessionStatus(800, "offline");
+                var deferred = $q.defer();
+
+                if(this.remotedb) {
+                    this.remotedb.logout(function(error, response) {
+                        if(error) {
+                            deferred.reject(error);
+                        } else {
+                            this.settings['stayConnected'] = false;
+                            storage.pouchSettings = this.getSettings();
+                            this.cancelProgressiveRetry();
+                            this.disconnect();
+                            this.createRemoteDb();
+                            this.delaySessionStatus(800, "offline");
+                            defered.resolve(response);
+                        }
+                    });
+                }
+
+                return deferred.promise;
             },
 
             // Connect to Remote Database and Start Replication
