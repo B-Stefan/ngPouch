@@ -567,7 +567,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                             self.disconnect();
                             self.createRemoteDb();
                             self.delaySessionStatus(800, "offline");
-                            defered.resolve(response);
+                            deferred.resolve(response);
                         }
                     });
                 }
