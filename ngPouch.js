@@ -356,7 +356,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                 //Excluded by exclusiveDisable array
                 if(exclusiveDisable.indexOf(key) > -1){
                     return false;
-                //Internal field
+                    //Internal field
                 }else if(key.substr(0,1) === '_') {
                     return false;
                 }else if (typeof value === 'function' ){
@@ -386,7 +386,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                                     val[i] = self.recursiveObjectEncryptDecrypt.call(self,val[i],encryptDecryptFunction);
                                 }
 
-                            //If normal val
+                                //If normal val
                             } else {
                                 obj[key] = encryptDecryptFunction.call(this, val.toString());
                             }
@@ -409,7 +409,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                 }else {
                     self.db.transform({
                         incoming:function(doc) {
-                            if(doc._id.indexOf('_design') > -1) {
+                            if(doc._id.indexOf('_design') > -1 || doc._id.indexOf('org.couchdb.user:') > -1 ) {
                                 return doc;
                             } else if (doc.encrypted) {
                                 doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.decrypt);
@@ -422,7 +422,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                             }
                         },
                         outgoing: function(doc){
-                            if(doc._id.indexOf('_design') > -1) {
+                            if(doc._id.indexOf('_design') > -1 || doc._id.indexOf('org.couchdb.user:') > -1 ) {
                                 return doc;
                             } else if (!doc.encrypted) {
                                 doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt);
