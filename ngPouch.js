@@ -553,18 +553,19 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
             logoff: function() {
 
                 var deferred = $q.defer();
+                var self = this
 
-                if(this.remotedb) {
-                    this.remotedb.logout(function(error, response) {
+                if(self.remotedb) {
+                    self.remotedb.logout(function(error, response) {
                         if(error) {
                             deferred.reject(error);
                         } else {
-                            this.settings['stayConnected'] = false;
-                            storage.pouchSettings = this.getSettings();
-                            this.cancelProgressiveRetry();
-                            this.disconnect();
-                            this.createRemoteDb();
-                            this.delaySessionStatus(800, "offline");
+                            self.settings['stayConnected'] = false;
+                            storage.pouchSettings = self.getSettings();
+                            self.cancelProgressiveRetry();
+                            self.disconnect();
+                            self.createRemoteDb();
+                            self.delaySessionStatus(800, "offline");
                             defered.resolve(response);
                         }
                     });
