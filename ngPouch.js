@@ -553,7 +553,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
             logoff: function() {
 
                 var deferred = $q.defer();
-                var self = this
+                var self = this;
 
                 if(self.remotedb) {
                     self.remotedb.logout(function(error, response) {
@@ -570,6 +570,8 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                             deferred.resolve(response);
                         }
                     });
+                } else {
+                    deferred.resolve();
                 }
 
                 return deferred.promise;
