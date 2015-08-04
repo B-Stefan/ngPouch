@@ -3,6 +3,10 @@
 angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
     .service('ngPouch', function($timeout, $q, storage, $crypto) {
 
+        //FIXME the storage implementation is not working and based on a misconception of what angularLocalStorage is doing
+        // at the moment all stored values are just attached as properties to the service object and never make their
+        // way into localStorage
+
         var service =  {
             // Databases
             /*global PouchDB*/
@@ -185,6 +189,11 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
 
             getSettings: function() {
                 return this.settings;
+            },
+
+            setSettings: function (settings) {
+                this.settings = settings;
+                this.initRobustSync(1000);
             },
 
             saveSettings: function(settings) {
