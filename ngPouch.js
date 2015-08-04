@@ -271,7 +271,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                 var self = this;
                 self.session.lastConnectionAttempt = new Date();
                 self.flashSessionStatus("connecting");
-                self.connect();
+                return self.connect();
             },
 
 
@@ -538,6 +538,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
             },
 
             createRemoteDb: function() {
+                var deferred = $q.defer();
                 var self = this;
 
                 if (typeof self.settings.database === "string")
@@ -545,9 +546,21 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                     self.remotedb = new PouchDB(this.settings.database);
                     if (typeof self.settings.username === "string" && typeof self.settings.password === "string")
                     {
-                        self.remotedb.login(this.settings.username, this.settings.password, function (err, response) {});
+                        self.remotedb.login(this.settings.username, this.settings.password, function (err, response) {
+                            if(err) {
+                                deferred.reject(err);
+                            } else {
+                                deferred.resolve(response);
+                            }
+                        });
+                    } else {
+                        deferred.resolve();
                     }
+                } else {
+                    deferred.reject();
                 }
+
+                return deferred.promise
             },
 
             logoff: function() {
@@ -583,7 +596,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                 self.session.docsSent = 0;
                 self.session.docsReceived = 0;
                 self.disconnect();
-                self.createRemoteDb();
+                var promise = self.createRemoteDb();
 
                 self.session.replicationTo = self.db.replicate.to(self.remotedb, {live: true})
                     .on('change', function(info)   {self.handleReplicationTo(info, "change");})
@@ -596,6 +609,8 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                     .on('uptodate', function(info) {self.handleReplicationFrom(info, "uptodate");})
                     .on('error', function(info)    {self.handleReplicationFrom(info, "error");})
                     .on('complete', function(info) {self.handleReplicationFrom(info, "complete");});
+
+                return promise;
             }
 
         };
