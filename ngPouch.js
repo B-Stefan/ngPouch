@@ -3,6 +3,10 @@
 angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
     .service('ngPouch', function($timeout, $q, storage, $crypto) {
 
+        //FIXME the storage implementation is not working and based on a misconception of what angularLocalStorage is doing
+        // at the moment all stored values are just attached as properties to the service object and never make their
+        // way into localStorage
+
         var service =  {
             // Databases
             /*global PouchDB*/
@@ -17,7 +21,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
             settings: {
                 database: undefined,
                 username: undefined,
-                password: undefined, //FIXME can't we be more secure than this?
+                password: undefined,
                 stayConnected: undefined
             },
 
@@ -187,6 +191,11 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                 return this.settings;
             },
 
+            setSettings: function (settings) {
+                this.settings = settings;
+                this.initRobustSync(1000);
+            },
+
             saveSettings: function(settings) {
                 this.settings = settings;
                 storage.pouchSettings = this.getSettings();
@@ -271,7 +280,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                 var self = this;
                 self.session.lastConnectionAttempt = new Date();
                 self.flashSessionStatus("connecting");
-                self.connect();
+                return self.connect();
             },
 
 
@@ -548,10 +557,8 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                     {
                         self.remotedb.login(this.settings.username, this.settings.password, function (err, response) {
                             if(err) {
-                                $log.error('[ngPouch]' + angular.toJson(err));
                                 deferred.reject(err);
                             } else {
-                                $log.log('[ngPouch]' + angular.toJson(response));
                                 deferred.resolve(response);
                             }
                         });
@@ -559,31 +566,34 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                         deferred.resolve();
                     }
                 } else {
-                    deferred.resolve();
+                    deferred.reject();
                 }
 
-                return deferred.promise;
+                return deferred.promise
             },
 
             logoff: function() {
+
                 var deferred = $q.defer();
-                var self = this;
+                var self = this
+
+                self.settings['stayConnected'] = false;
+                storage.pouchSettings = self.getSettings();
+                self.cancelProgressiveRetry();
+                self.disconnect();
+                self.delaySessionStatus(800, "offline");
 
                 if(self.remotedb) {
                     self.remotedb.logout(function(error, response) {
+                        self.remotedb = undefined;
                         if(error) {
                             deferred.reject(error);
                         } else {
-                            self.settings['stayConnected'] = false;
-                            storage.pouchSettings = self.getSettings();
-                            self.settings = {};
-                            self.cancelProgressiveRetry();
-                            self.disconnect();
-                            self.createRemoteDb();
-                            self.delaySessionStatus(800, "offline");
                             deferred.resolve(response);
                         }
                     });
+                } else {
+                    deferred.resolve();
                 }
 
                 return deferred.promise;
@@ -595,7 +605,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                 self.session.docsSent = 0;
                 self.session.docsReceived = 0;
                 self.disconnect();
-                var promise =  self.createRemoteDb();
+                var promise = self.createRemoteDb();
 
                 self.session.replicationTo = self.db.replicate.to(self.remotedb, {live: true})
                     .on('change', function(info)   {self.handleReplicationTo(info, "change");})
