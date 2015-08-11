@@ -21,7 +21,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
             settings: {
                 database: undefined,
                 username: undefined,
-                password: undefined,
+                password: undefined, //FIXME can we get more secure than this?
                 stayConnected: undefined
             },
 
@@ -46,7 +46,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                 publishInProgress: false
             },
 
-            // SPromises & Even Emitters
+            // Promises & Even Emitters
             changes: undefined,
             replicationTo: undefined,
             replicationFrom: undefined,
@@ -420,31 +420,63 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                         incoming:function(doc) {
                             if(doc._id.indexOf('_design') > -1 || doc._id.indexOf('org.couchdb.user:') > -1 ) {
                                 return doc;
-                            } else if (doc.encrypted) {
-                                doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.decrypt);
-                                doc.encrypted = false;
+                            } else if (doc.encrypted === true) {
                                 return doc;
-                            } else {
+                            } else if (doc.encrypted === false) {
                                 doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt);
                                 doc.encrypted = true;
+                                return doc;
+                            } else {
                                 return doc;
                             }
                         },
                         outgoing: function(doc){
                             if(doc._id.indexOf('_design') > -1 || doc._id.indexOf('org.couchdb.user:') > -1 ) {
                                 return doc;
-                            } else if (!doc.encrypted) {
-                                doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt);
-                                doc.encrypted = true;
+                            } else if (doc.encrypted === false) {
                                 return doc;
-                            } else {
+                            } else if (doc.encrypted === true) {
                                 doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.decrypt);
                                 doc.encrypted = false;
+                                return doc;
+                            } else {
                                 return doc;
                             }
                         }
                     });
                 }
+            },
+            initRemoteEncryption: function() {
+                var self = this;
+
+                self.remotedb.transform({
+                    incoming:function(doc) {
+                        if(doc._id.indexOf('_design') > -1) {
+                            return doc;
+                        } else if (doc.encrypted === true) {
+                            return doc;
+                        } else if (doc.encrypted === false) {
+                            doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt);
+                            doc.encrypted = true;
+                            return doc;
+                        } else {
+                            return doc;
+                        }
+                    },
+                    outgoing: function(doc){
+                        if(doc._id.indexOf('_design') > -1) {
+                            return doc;
+                        } else if (doc.encrypted === false) {
+                            doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt);
+                            doc.encrypted = true;
+                            return doc;
+                        } else if (doc.encrypted === true) {
+                            return doc;
+                        } else {
+                            return doc;
+                        }
+                    }
+                });
             },
             trackChanges: function() {
                 var self = this;
@@ -545,8 +577,8 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                     self.session.replicationFrom.cancel();
                 }
             },
-
             createRemoteDb: function() {
+
                 var deferred = $q.defer();
                 var self = this;
 
@@ -559,6 +591,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                             if(err) {
                                 deferred.reject(err);
                             } else {
+                                self.initRemoteEncryption();
                                 deferred.resolve(response);
                             }
                         });
@@ -569,13 +602,13 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                     deferred.reject();
                 }
 
-                return deferred.promise
+                return deferred.promise;
             },
 
             logoff: function() {
 
                 var deferred = $q.defer();
-                var self = this
+                var self = this;
 
                 self.settings['stayConnected'] = false;
                 storage.pouchSettings = self.getSettings();
