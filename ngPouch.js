@@ -375,7 +375,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                 }
             },
 
-            recursiveObjectEncryptDecrypt: function (obj, encryptDecryptFunction){
+            recursiveObjectEncryptDecrypt: function (obj, encryptDecryptFunction, password){
                 var self = this;
 
                 for (var key in obj) {
@@ -387,17 +387,17 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
 
                             //Recursive call if object
                             if(typeof val === 'object'){
-                                obj[key] = self.recursiveObjectEncryptDecrypt.call(self,val,encryptDecryptFunction);
+                                obj[key] = self.recursiveObjectEncryptDecrypt.call(self,val,encryptDecryptFunction, password);
 
                                 //Call for each element of an array
                             } else if (angular.isArray(obj)) {
                                 for (var i = 0; i < val.length; i++) {
-                                    val[i] = self.recursiveObjectEncryptDecrypt.call(self,val[i],encryptDecryptFunction);
+                                    val[i] = self.recursiveObjectEncryptDecrypt.call(self,val[i],encryptDecryptFunction, password);
                                 }
 
                                 //If normal val
                             } else {
-                                obj[key] = encryptDecryptFunction.call(this, val.toString());
+                                obj[key] = encryptDecryptFunction.call(this, val.toString(), password);
                             }
                         }
                         if (typeof val === 'function'){
@@ -423,7 +423,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                             } else if (doc.encrypted === true) {
                                 return doc;
                             } else if (doc.encrypted === false) {
-                                doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt);
+                                doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt, self.settings.password);
                                 doc.encrypted = true;
                                 return doc;
                             } else {
@@ -436,7 +436,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                             } else if (doc.encrypted === false) {
                                 return doc;
                             } else if (doc.encrypted === true) {
-                                doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.decrypt);
+                                doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.decrypt, self.settings.password);
                                 doc.encrypted = false;
                                 return doc;
                             } else {
@@ -456,7 +456,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                         } else if (doc.encrypted === true) {
                             return doc;
                         } else if (doc.encrypted === false) {
-                            doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt);
+                            doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt, self.settings.password);
                             doc.encrypted = true;
                             return doc;
                         } else {
@@ -467,7 +467,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                         if(doc._id.indexOf('_design') > -1) {
                             return doc;
                         } else if (doc.encrypted === false) {
-                            doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt);
+                            doc = self.recursiveObjectEncryptDecrypt(doc, $crypto.encrypt, self.settings.password);
                             doc.encrypted = true;
                             return doc;
                         } else if (doc.encrypted === true) {
