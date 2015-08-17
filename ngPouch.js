@@ -385,17 +385,17 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                         var val = obj[key];
                         if(self.isKeyInEncryptionList(key,val)) {
 
+                            if(angular.isDate(val)) {
+                                obj[key] = encryptDecryptFunction.call(this, val.toString(), password);
                             //Recursive call if object
-                            if(typeof val === 'object'){
+                            } else if(typeof val === 'object'){
                                 obj[key] = self.recursiveObjectEncryptDecrypt.call(self,val,encryptDecryptFunction, password);
-
-                                //Call for each element of an array
+                            //Call for each element of an array
                             } else if (angular.isArray(obj)) {
                                 for (var i = 0; i < val.length; i++) {
                                     val[i] = self.recursiveObjectEncryptDecrypt.call(self,val[i],encryptDecryptFunction, password);
                                 }
-
-                                //If normal val
+                            //If normal val
                             } else {
                                 obj[key] = encryptDecryptFunction.call(this, val.toString(), password);
                             }
