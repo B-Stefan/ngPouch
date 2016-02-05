@@ -619,6 +619,7 @@ angular.module('ngPouch', ['angularLocalStorage','mdo-angular-cryptography'])
                 if(self.remotedb) {
                     self.remotedb.logout(function(error, response) {
                         self.remotedb = undefined;
+
                         if(error) {
                             deferred.reject(error);
                         } else {

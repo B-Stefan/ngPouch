@@ -23,10 +23,10 @@
   ],
   "dependencies": {
     "pouchdb": "~3.6.0",
-    "ngStorage": "~0.1.8",
+    "ngStorage": "~0.3.2",
     "angular-uuid-service": "~0.0.1",
     "angular-cryptography": "git://github.com/middleout/angular-cryptography#master",
     "transform-pouch": "~1.0.2",
-    "pouchdb-authentication": "~0.3.6"
+    "pouchdb-authentication": "~0.4.3"
   }
 }
