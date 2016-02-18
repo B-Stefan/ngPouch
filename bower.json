@@ -26,7 +26,7 @@
     "ngStorage": "~0.3.2",
     "angular-uuid-service": "~0.0.1",
     "angular-cryptography": "git://github.com/middleout/angular-cryptography#master",
-    "transform-pouch": "~1.0.2",
+    "transform-pouch": "git://github.com/morlikowski/transform-pouch#master",
     "pouchdb-authentication": "~0.4.3"
   }
 }
