@@ -22,7 +22,7 @@
     "npm-debug.log"
   ],
   "dependencies": {
-    "pouchdb": "~3.6.0",
+    "pouchdb": "~5.6.0",
     "ngStorage": "~0.3.2",
     "angular-uuid-service": "~0.0.1",
     "angular-cryptography": "git://github.com/middleout/angular-cryptography#master",
