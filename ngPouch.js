@@ -581,7 +581,7 @@ angular.module('ngPouch', ['angularLocalStorage', 'mdo-angular-cryptography'])
         var self = this;
 
         if (typeof self.settings.database === "string") {
-          self.remotedb = new PouchDB(this.settings.database);
+          self.remotedb = new PouchDB(this.settings.database, {skipSetup:true});
           if (typeof self.settings.username === "string" && typeof self.settings.password === "string") {
             self.remotedb.login(this.settings.username, this.settings.password, function(err, response) {
               if (err) {
